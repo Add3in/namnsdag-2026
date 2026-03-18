@@ -22,10 +22,10 @@ def load_font(size):
     except:
         return ImageFont.load_default()
 
-# Auto-scaling function
+# Auto-scale function for any text
 def autoscale_text(draw, text, max_width, start_size):
     size = start_size
-    while size > 30:  # stop limit
+    while size > 30:  # Minsta tillåtna textstorlek
         font = load_font(size)
         w = draw.textbbox((0,0), text, font=font)[2]
         if w <= max_width:
@@ -39,7 +39,7 @@ def generate_image():
     dd = f"{now.day:02d}"
     key = f"{mm}-{dd}"
 
-    # WEEKDAY
+    # Weekday
     if key == "02-29":
         weekday = "Skottdagen"
     else:
@@ -56,34 +56,35 @@ def generate_image():
     tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
     # Create image
-    img = Image.new("RGB", (1920, 1080), "#001133")
+    img = Image.new("RGB", (1920, 1080), "#001133")  # Mörkblå bakgrund
     draw = ImageDraw.Draw(img)
 
     center_x = 1920 // 2
 
-    # FIXED FONTS
-    FONT_DATE_FIXED = load_font(100)
-    FONT_TEMA_FIXED = load_font(100)
+    # Datum-storlek är fast
+    FONT_DATE = load_font(100)
 
-    # AUTOSCALE NAMNSDAG FONT
-    circle_max_width = 1100
-    FONT_NAMN = autoscale_text(draw, namn_text, circle_max_width, 150)
+    # Autoskalning så texten hamnar inne i cirkeln (1100 px bred)
+    max_width = 1100
 
-    # MÅTT
-    _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE_FIXED)
+    FONT_NAMN = autoscale_text(draw, namn_text, max_width, 150)
+    FONT_TEMA = autoscale_text(draw, tema_text, max_width, 100) if tema_text else None
+
+    # Textmått
+    _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
     _, _, w_namn, h_namn = draw.textbbox((0,0), namn_text, font=FONT_NAMN)
 
     if tema_text:
-        _, _, w_tema, h_tema = draw.textbbox((0,0), tema_text, font=FONT_TEMA_FIXED)
+        _, _, w_tema, h_tema = draw.textbbox((0,0), tema_text, font=FONT_TEMA)
     else:
         w_tema, h_tema = 0, 0
 
-    # TOTALHÖJD
+    # Total höjd
     total_height = h_date + h_namn + h_tema + 120
     start_y = (1080 - total_height) // 2
     y = start_y
 
-    # CIRKEL
+    # Cirkel
     circle_radius = 600
     circle_center = (center_x, 540)
 
@@ -99,17 +100,17 @@ def generate_image():
         width=10
     )
 
-    # TEXT: Datum
-    draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE_FIXED)
+    # Datum
+    draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE)
     y += h_date + 40
 
-    # TEXT: Namnsdag (autoscaled)
+    # Namnsdag
     draw.text((center_x - w_namn//2, y), namn_text, fill="white", font=FONT_NAMN)
     y += h_namn + 40
 
-    # TEXT: Temadag
+    # Temadag
     if tema_text:
-        draw.text((center_x - w_tema//2, y), tema_text, fill="white", font=FONT_TEMA_FIXED)
+        draw.text((center_x - w_tema//2, y), tema_text, fill="white", font=FONT_TEMA)
 
     img.save("namnsdag-2026.png")
 
