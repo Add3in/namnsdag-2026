@@ -10,26 +10,30 @@ MONTHS = [
     "juli", "augusti", "september", "oktober", "november", "december"
 ]
 
-WEEKDAYS = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
+WEEKDAYS = [
+    "Måndag", "Tisdag", "Onsdag", "Torsdag",
+    "Fredag", "Lördag", "Söndag"
+]
 
-# Font fallback
+# Load fonts
 def load_font(size):
     try:
         return ImageFont.truetype("DejaVuSans.ttf", size)
     except:
         return ImageFont.load_default()
 
-FONT_DATE = load_font(64)
-FONT_NAME = load_font(48)
-FONT_TEMA = load_font(32)
+FONT_DATE = load_font(100)       # Datum + veckodag
+FONT_TEMA = load_font(100)       # Temadag
+FONT_NAMN = load_font(150)       # Namnsdag
 
 def generate_image():
+    # Today's date
     now = datetime.datetime.now()
     mm = f"{now.month:02d}"
     dd = f"{now.day:02d}"
     key = f"{mm}-{dd}"
 
-    # Feb 29 special
+    # Weekday logic
     if key == "02-29":
         weekday = "Skottdagen"
     else:
@@ -37,31 +41,21 @@ def generate_image():
 
     date_text = f"{weekday} {int(dd)} {MONTHS[int(mm)]}"
 
+    # Get JSON data
     item = DB.get(key, {"namnsdag": [], "temadag": []})
+    namn_raw = ", ".join(item.get("namnsdag", []))
+    namn_text = f"Namnsdag: {namn_raw}" if namn_raw else "Namnsdag: -"
 
-    namn = ", ".join(item.get("namnsdag", []))
-    namn_text = f"Namnsdag: {namn}" if namn else "Namnsdag: -"
+    tema_raw = ", ".join(item.get("temadag", []))
+    tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
-    tema = ", ".join(item.get("temadag", []))
-    tema_text = f"Temadag: {tema}" if tema else ""
-
-    img = Image.new("RGB", (1920,1080), "#003366")
+    # Create image
+    img = Image.new("RGB", (1920, 1080), "#001133")  # Mörkblå bakgrund
     draw = ImageDraw.Draw(img)
 
-    # Date
-    w = draw.textbbox((0,0), date_text, font=FONT_DATE)[2]
-    draw.text(((1920-w)/2, 150), date_text, fill="white", font=FONT_DATE)
+    # Center positions (vertikalt)
+    center_x = 1920 // 2
 
-    # Namnsdag
-    w = draw.textbbox((0,0), namn_text, font=FONT_NAME)[2]
-    draw.text(((1920-w)/2, 300), namn_text, fill="white", font=FONT_NAME)
+    # TEXT MÅTT
+    _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
 
-    # Temadag
-    if tema_text:
-        w = draw.textbbox((0,0), tema_text, font=FONT_TEMA)[2]
-        draw.text(((1920-w)/2, 450), tema_text, fill="white", font=FONT_TEMA)
-
-    img.save("namnsdag-2026.png")
-
-if __name__ == "__main__":
-    generate_image()
