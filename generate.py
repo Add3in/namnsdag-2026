@@ -22,10 +22,10 @@ def load_font(size):
     except:
         return ImageFont.load_default()
 
-# Auto-scale function for any text
+# Auto-scale function for long text
 def autoscale_text(draw, text, max_width, start_size):
     size = start_size
-    while size > 30:  # Minsta tillåtna textstorlek
+    while size > 30:
         font = load_font(size)
         w = draw.textbbox((0,0), text, font=font)[2]
         if w <= max_width:
@@ -40,37 +40,35 @@ def generate_image():
     key = f"{mm}-{dd}"
 
     # Weekday
-    if key == "02-29":
-        weekday = "Skottdagen"
-    else:
-        weekday = WEEKDAYS[now.weekday()]
-
+    weekday = "Skottdagen" if key == "02-29" else WEEKDAYS[now.weekday()]
     date_text = f"{weekday} {int(dd)} {MONTHS[int(mm)]}"
 
     # JSON-data
     item = DB.get(key, {"namnsdag": [], "temadag": []})
-    namn_raw = ", ".join(item.get("namnsdag", []))
+
+    # ✅ Use & between names instead of comma
+    namn_raw_list = item.get("namnsdag", [])
+    namn_raw = " & ".join(namn_raw_list)
     namn_text = f"Namnsdag: {namn_raw}" if namn_raw else "Namnsdag: -"
 
-    tema_raw = ", ".join(item.get("temadag", []))
+    tema_raw_list = item.get("temadag", [])
+    tema_raw = " & ".join(tema_raw_list)
     tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
     # Create image
-    img = Image.new("RGB", (1920, 1080), "#001133")  # Mörkblå bakgrund
+    img = Image.new("RGB", (1920, 1080), "#001133")
     draw = ImageDraw.Draw(img)
 
     center_x = 1920 // 2
 
-    # Datum-storlek är fast
+    # Fixed font for date
     FONT_DATE = load_font(100)
 
-    # Autoskalning så texten hamnar inne i cirkeln (1100 px bred)
-    max_width = 1100
+    # Autoscale name + temadag
+    FONT_NAMN = autoscale_text(draw, namn_text, 1100, 150)
+    FONT_TEMA = autoscale_text(draw, tema_text, 1100, 100) if tema_text else None
 
-    FONT_NAMN = autoscale_text(draw, namn_text, max_width, 150)
-    FONT_TEMA = autoscale_text(draw, tema_text, max_width, 100) if tema_text else None
-
-    # Textmått
+    # Measurements
     _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
     _, _, w_namn, h_namn = draw.textbbox((0,0), namn_text, font=FONT_NAMN)
 
@@ -79,15 +77,13 @@ def generate_image():
     else:
         w_tema, h_tema = 0, 0
 
-    # Total höjd
+    # Vertical centering
     total_height = h_date + h_namn + h_tema + 120
-    start_y = (1080 - total_height) // 2
-    y = start_y
+    y = (1080 - total_height) // 2
 
-    # Cirkel
+    # Circle
     circle_radius = 600
     circle_center = (center_x, 540)
-
     draw.ellipse(
         (
             circle_center[0] - circle_radius,
@@ -100,15 +96,13 @@ def generate_image():
         width=10
     )
 
-    # Datum
+    # Draw text
     draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE)
     y += h_date + 40
 
-    # Namnsdag
     draw.text((center_x - w_namn//2, y), namn_text, fill="white", font=FONT_NAMN)
     y += h_namn + 40
 
-    # Temadag
     if tema_text:
         draw.text((center_x - w_tema//2, y), tema_text, fill="white", font=FONT_TEMA)
 
