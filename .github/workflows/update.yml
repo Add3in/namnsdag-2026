@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write   # ✅ GER ACTIONS RÄTT ATT PUSH'A
+      contents: write   # ✅ KRITISKT – utan denna får du 403 !
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v4   # ✅ NY VERSION
+      uses: actions/checkout@v4   # ✅ senaste versionen
 
     - name: Setup Python
-      uses: actions/setup-python@v5   # ✅ NY VERSION
+      uses: actions/setup-python@v5   # ✅ senaste versionen
       with:
         python-version: "3.10"
 
