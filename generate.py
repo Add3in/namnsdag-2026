@@ -48,7 +48,7 @@ def generate_image():
     tema_raw = " & ".join(item.get("temadag", []))
     tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
-    img = Image.new("RGB", (1920, 1080), "#001133")
+    img = Image.new("RGB", (1920, 1080), "#4169E1")
     draw = ImageDraw.Draw(img)
 
     center_x = 1920 // 2
