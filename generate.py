@@ -53,7 +53,7 @@ def generate_image():
 
     center_x = 1920 // 2
 
-    FONT_DATE = load_font(100)
+    FONT_DATE = load_font(70)
     FONT_NAMN = autoscale_text(draw, namn_text, 1100, 150)
     FONT_TEMA = autoscale_text(draw, tema_text, 1100, 100) if tema_text else None
 
