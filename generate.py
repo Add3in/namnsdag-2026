@@ -40,7 +40,9 @@ def generate_image():
     date_text = f"{weekday} {int(dd)} {MONTHS[int(mm)]}"
 
     item = DB.get(key, {"namnsdag": [], "temadag": []})
-
+# ✅ Remove footnotes like [2], [7], [10] from temadagar
+item["temadag"] = [t.split('[')[0].strip() for t in item.get("temadag", [])]
+``
     # ✅ Replace comma with & between names
     namn_raw = " & ".join(item.get("namnsdag", []))
     namn_text = f"Namnsdag: {namn_raw}" if namn_raw else "Namnsdag: -"
