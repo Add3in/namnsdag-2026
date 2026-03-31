@@ -1,41 +1,33 @@
 from PIL import Image, ImageDraw, ImageFont
 import datetime, json
-import pytz   # ✅ Svensk tidszon
+import pytz   # svensk tid
 
-# ✅ Sätt svensk tid (löser fel datum!)
+# svensk tidszon
 TZ = pytz.timezone("Europe/Stockholm")
 
-# Load namnsdag + temadagar 
+# Load JSON
 with open("full.json", "r", encoding="utf-8") as f:
     DB = json.load(f)
 
-MONTHS = [
-    "", "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-]
+MONTHS = ["", "januari", "februari", "mars", "april", "maj", "juni",
+          "juli", "augusti", "september", "oktober", "november", "december"]
 
-WEEKDAYS = [
-    "Måndag", "Tisdag", "Onsdag", "Torsdag",
-    "Fredag", "Lördag", "Söndag"
-]
+WEEKDAYS = ["Måndag", "Tisdag", "Onsdag", "Torsdag",
+            "Fredag", "Lördag", "Söndag"]
 
-# ✅ LOAD FONT
 def load_font(size):
     return ImageFont.truetype("DejaVuSans.ttf", size)
 
-# Auto-scale text width
 def autoscale_text(draw, text, max_width, start_size):
     size = start_size
     while size > 30:
         font = load_font(size)
-        w = draw.textbbox((0,0), text, font=font)[2]
-        if w <= max_width:
+        if draw.textbbox((0,0), text, font=font)[2] <= max_width:
             return font
         size -= 5
     return load_font(30)
 
 def generate_image():
-    # ✅ Rätt svensk tid
     now = datetime.datetime.now(TZ)
 
     mm = f"{now.month:02d}"
@@ -46,19 +38,14 @@ def generate_image():
     date_text = f"{weekday} {int(dd)} {MONTHS[int(mm)]}"
 
     item = DB.get(key, {"namnsdag": [], "temadag": []})
-
-    # Namnsdag
     namn_raw = " & ".join(item.get("namnsdag", []))
     namn_text = f"Namnsdag: {namn_raw}" if namn_raw else "Namnsdag: -"
 
-    # Temadag
     tema_raw = " & ".join(item.get("temadag", []))
     tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
-    # Create image
     img = Image.new("RGB", (1920, 1080), "#4169E1")
     draw = ImageDraw.Draw(img)
-
     center_x = 1920 // 2
 
     FONT_DATE = load_font(100)
@@ -67,8 +54,8 @@ def generate_image():
 
     _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
     _, _, w_namn, h_namn = draw.textbbox((0,0), namn_text, font=FONT_NAMN)
-    w_tema, h_tema = 0, 0
 
+    w_tema, h_tema = 0, 0
     if tema_text:
         _, _, w_tema, h_tema = draw.textbbox((0,0), tema_text, font=FONT_TEMA)
 
@@ -77,29 +64,23 @@ def generate_image():
 
     circle_radius = 600
     circle_center = (center_x, 540)
-
     draw.ellipse(
-        (
-            circle_center[0] - circle_radius,
-            circle_center[1] - circle_radius,
-            circle_center[0] + circle_radius,
-            circle_center[1] + circle_radius
-        ),
-        fill="#5FA8FF",
-        outline="white",
-        width=10
+        (circle_center[0]-circle_radius, circle_center[1]-circle_radius,
+         circle_center[0]+circle_radius, circle_center[1]+circle_radius),
+        fill="#5FA8FF", outline="white", width=10
     )
 
     draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE)
     y += h_date + 40
-
     draw.text((center_x - w_namn//2, y), namn_text, fill="white", font=FONT_NAMN)
     y += h_namn + 40
 
     if tema_text:
         draw.text((center_x - w_tema//2, y), tema_text, fill="white", font=FONT_TEMA)
 
-    img.save("namnsdag-2026.png")
+    # ✅ SPARA MED DATUMVERSION
+    version = now.strftime("%Y%m%d")
+    img.save(f"namnsdag-2026_v{version}.png")
 
 if __name__ == "__main__":
     generate_image()
