@@ -21,23 +21,22 @@
 <body>
 
 <script>
-  async function loadLatest() {
-    const url = "https://api.github.com/repos/Add3in/namnsdag-2026/contents";
-    const res = await fetch(url);
-    const files = await res.json();
+(async () => {
+  const api = "https://api.github.com/repos/Add3in/namnsdag-2026/contents";
+  const base = "https://add3in.github.io/namnsdag-2026/";
 
-    const pngs = files
-      .filter(f => f.name.startsWith("namnsdag-2026_v"))
-      .map(f => f.name)
-      .sort()
-      .reverse();    // Senaste först
+  const res = await fetch(api);
+  const files = await res.json();
 
-    const latest = pngs[0];
-    document.body.innerHTML = `<img src}`;
-  }
+  const pngs = files
+    .filter(f => f.name.startsWith("namnsdag-2026_v") && f.name.endsWith(".png"))
+    .map(f => f.name)
+    .sort()
+    .reverse();
 
-  loadLatest();
-</script>
+  const latest = pngs[0];
+
+  document.body.innerHTML = `<img src="${base}${latest}" altpt>
 
 </body>
 </html>
