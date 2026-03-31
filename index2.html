@@ -19,24 +19,6 @@
 </style>
 </head>
 <body>
-
-<script>
-(async () => {
-  const api = "https://api.github.com/repos/Add3in/namnsdag-2026/contents";
-  const base = "https://add3in.github.io/namnsdag-2026/";
-
-  const res = await fetch(api);
-  const files = await res.json();
-
-  const pngs = files
-    .filter(f => f.name.startsWith("namnsdag-2026_v") && f.name.endsWith(".png"))
-    .map(f => f.name)
-    .sort()
-    .reverse();
-
-  const latest = pngs[0];
-
-  document.body.innerHTML = `<img src="${base}${latest}" altpt>
-
+<img id="bild" src="namnsdag-2026.png" alt="namnsdag">
 </body>
 </html>
