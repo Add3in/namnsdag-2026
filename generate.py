@@ -1,9 +1,13 @@
 from PIL import Image, ImageDraw, ImageFont
-import datetime, json 
+import datetime, json
+import pytz   # ✅ Svensk tidszon
+
+# ✅ Sätt svensk tid (löser fel datum!)
+TZ = pytz.timezone("Europe/Stockholm")
 
 # Load namnsdag + temadagar 
-with open("full.json", "r", encoding="utf-8") as f: 
-    DB = json.load(f) 
+with open("full.json", "r", encoding="utf-8") as f:
+    DB = json.load(f)
 
 MONTHS = [
     "", "januari", "februari", "mars", "april", "maj", "juni",
@@ -15,11 +19,11 @@ WEEKDAYS = [
     "Fredag", "Lördag", "Söndag"
 ]
 
-# ✅ LOAD FONT FROM DejaVuSans.ttf ALWAYS 
+# ✅ LOAD FONT
 def load_font(size):
     return ImageFont.truetype("DejaVuSans.ttf", size)
 
-# Auto-scale function 
+# Auto-scale text width
 def autoscale_text(draw, text, max_width, start_size):
     size = start_size
     while size > 30:
@@ -31,7 +35,9 @@ def autoscale_text(draw, text, max_width, start_size):
     return load_font(30)
 
 def generate_image():
-    now = datetime.datetime.now()
+    # ✅ Rätt svensk tid
+    now = datetime.datetime.now(TZ)
+
     mm = f"{now.month:02d}"
     dd = f"{now.day:02d}"
     key = f"{mm}-{dd}"
@@ -41,13 +47,15 @@ def generate_image():
 
     item = DB.get(key, {"namnsdag": [], "temadag": []})
 
-    # ✅ Replace comma with & between names 
+    # Namnsdag
     namn_raw = " & ".join(item.get("namnsdag", []))
     namn_text = f"Namnsdag: {namn_raw}" if namn_raw else "Namnsdag: -"
 
+    # Temadag
     tema_raw = " & ".join(item.get("temadag", []))
     tema_text = f"Temadag: {tema_raw}" if tema_raw else ""
 
+    # Create image
     img = Image.new("RGB", (1920, 1080), "#4169E1")
     draw = ImageDraw.Draw(img)
 
@@ -59,8 +67,8 @@ def generate_image():
 
     _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
     _, _, w_namn, h_namn = draw.textbbox((0,0), namn_text, font=FONT_NAMN)
-
     w_tema, h_tema = 0, 0
+
     if tema_text:
         _, _, w_tema, h_tema = draw.textbbox((0,0), tema_text, font=FONT_TEMA)
 
@@ -84,6 +92,7 @@ def generate_image():
 
     draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE)
     y += h_date + 40
+
     draw.text((center_x - w_namn//2, y), namn_text, fill="white", font=FONT_NAMN)
     y += h_namn + 40
 
