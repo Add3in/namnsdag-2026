@@ -80,7 +80,7 @@ def generate_image():
 
     # ✅ SPARA MED DATUMVERSION
     version = now.strftime("%Y%m%d")
-    img.save(f"namnsdag-2026_v{version}.png")
+    img.save(f"./namnsdag-2026_v{version}.png"
 
 if __name__ == "__main__":
     generate_image()
