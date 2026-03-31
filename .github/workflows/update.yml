@@ -3,7 +3,7 @@ name: Update Namnsdag Image
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 4 * * *"   # Kör 04:00 UTC = 06:00 svensk tid
+    - cron: "0 4 * * *"   # 04:00 UTC = 06:00 svensk tid
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python dependencies
+      - name: Install Python requirements
         run: |
           python3 -m pip install --upgrade pip
           pip install pillow pytz
@@ -30,8 +30,8 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add namnsdag-2026.png
-          git commit -m "Daily update" || echo "No changes to commit"
+          git add namnsdag-2026_v*.png
+          git commit -m "Daily auto-update" || echo "No changes"
 
       - name: Push changes
         uses: ad-m/github-push-action@v1
