@@ -10,17 +10,34 @@
     height: 100%;
     overflow: hidden;
   }
-
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;   /* Viktigt: visar hela bilden */
+    object-fit: contain;
     display: block;
   }
 </style>
 </head>
 <body>
-<img src="namnsdag-2026.png?v=2" alt="Namnsdagbild">
+
+<script>
+  async function loadLatest() {
+    const url = "https://api.github.com/repos/Add3in/namnsdag-2026/contents";
+    const res = await fetch(url);
+    const files = await res.json();
+
+    const pngs = files
+      .filter(f => f.name.startsWith("namnsdag-2026_v"))
+      .map(f => f.name)
+      .sort()
+      .reverse();    // Senaste först
+
+    const latest = pngs[0];
+    document.body.innerHTML = `<img src}`;
+  }
+
+  loadLatest();
+</script>
+
 </body>
 </html>
-``
