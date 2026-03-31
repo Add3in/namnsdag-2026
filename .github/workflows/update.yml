@@ -3,37 +3,37 @@ name: Update Namnsdag Image
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 5 * * *"   # Kör varje morgon kl 05 svensk tid
+    - cron: "0 4 * * *"   # Kör 04:00 UTC = 06:00 svensk tid
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ✅ Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: ✅ Install required Python packages
+      - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           pip install pillow pytz
 
-      - name: ✅ Run image generator
+      - name: Run generator
         run: python3 generate.py
 
-      - name: ✅ Save updated PNG
+      - name: Commit updated PNG
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add namnsdag-2026.png
-          git commit -m "Automated daily update" || echo "No changes to commit"
+          git commit -m "Daily update" || echo "No changes to commit"
 
-      - name: ✅ Push updated file
+      - name: Push changes
         uses: ad-m/github-push-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
