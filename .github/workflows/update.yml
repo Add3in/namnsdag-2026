@@ -3,7 +3,7 @@ name: Update Namnsdag Image
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 4 * * *"   # kör varje dag 04:00 UTC = 06:00 svensk tid
+    - cron: "0 4 * * *"   # Kör varje dag 04:00 UTC = 06:00 svensk tid
 
 jobs:
   build:
