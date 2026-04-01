@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 import datetime, json
 import pytz   # För svensk tid
 
-# ✅ Svensk tidszon – DETTA ÄR DET SOM FIXAR FEL DAG
+# ✅ Svensk tidszon
 TZ = pytz.timezone("Europe/Stockholm")
 
 # ✅ Ladda JSON-databasen
@@ -29,7 +29,7 @@ def autoscale_text(draw, text, max_width, start_size):
     return load_font(30)
 
 def generate_image():
-    # ✅ HÄR FIXAS TIDSZONEN
+    # ✅ Svensk tid
     now = datetime.datetime.now(TZ)
 
     mm = f"{now.month:02d}"
@@ -55,12 +55,12 @@ def generate_image():
     FONT_NAMN = autoscale_text(draw, namn_text, 1100, 150)
     FONT_TEMA = autoscale_text(draw, tema_text, 1100, 100) if tema_text else None
 
-    _, _, w_date, h_date = draw.textbbox((0, 0), date_text, font=FONT_DATE)
-    _, _, w_namn, h_namn = draw.textbbox((0, 0), namn_text, font=FONT_NAMN)
+    _, _, w_date, h_date = draw.textbbox((0,0), date_text, font=FONT_DATE)
+    _, _, w_namn, h_namn = draw.textbbox((0,0), namn_text, font=FONT_NAMN)
 
     w_tema, h_tema = 0, 0
     if tema_text:
-        _, _, w_tema, h_tema = draw.textbbox((0, 0), tema_text, font=FONT_TEMA)
+        _, _, w_tema, h_tema = draw.textbbox((0,0), tema_text, font=FONT_TEMA)
 
     total_height = h_date + h_namn + h_tema + 120
     y = (1080 - total_height) // 2
@@ -69,12 +69,8 @@ def generate_image():
     circle_center = (center_x, 540)
 
     draw.ellipse(
-        (
-            circle_center[0] - circle_radius,
-            circle_center[1] - circle_radius,
-            circle_center[0] + circle_radius,
-            circle_center[1] + circle_radius
-        ),
+        (circle_center[0]-circle_radius, circle_center[1]-circle_radius,
+         circle_center[0]+circle_radius, circle_center[1]+circle_radius),
         fill="#5FA8FF",
         outline="white",
         width=10
@@ -82,21 +78,17 @@ def generate_image():
 
     draw.text((center_x - w_date//2, y), date_text, fill="white", font=FONT_DATE)
     y += h_date + 40
-
     draw.text((center_x - w_namn//2, y), namn_text, fill="white", font=FONT_NAMN)
     y += h_namn + 40
 
     if tema_text:
         draw.text((center_x - w_tema//2, y), tema_text, fill="white", font=FONT_TEMA)
 
-    # ✅ SPARA BÅDE VERSION & FALLBACK (viktigt!)
+    # ✅ Spara version + fallback
     version = now.strftime("%Y%m%d")
 
-    filename_versioned = f"namnsdag-2026_v{version}.png"
-    filename_fallback = "namnsdag-2026.png"
-
-    img.save(filename_versioned)
-    img.save(filename_fallback)
+    img.save(f"namnsdag-2026_v{version}.png")
+    img.save("namnsdag-2026.png")
 
 if __name__ == "__main__":
     generate_image()
