@@ -3,7 +3,7 @@ name: Update Namnsdag Image
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 4 * * *"   # 04:00 UTC = 07:00 svensk tid
+    - cron: "0 5 * * *"   # 05:00 UTC = 07:00 svensk tid
 
 jobs:
   update-image:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set Swedish date (authoritative)
+      - name: Set Swedish date
         run: |
           echo "RUN_DATE=$(TZ=Europe/Stockholm date +%Y-%m-%d)" >> $GITHUB_ENV
           echo "Using date: $(TZ=Europe/Stockholm date)"
@@ -28,17 +28,47 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pillow pytz
+          pip install pillow
 
       - name: Generate image
         run: python3 generate.py
         env:
           RUN_DATE: ${{ env.RUN_DATE }}
 
+      - name: Update index2.html to todays image
+        run: |
+          VERSION=${RUN_DATE//-/}
+          cat <<EOF > index2.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset="UTF-8">
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: #4169E1;
+              height: 100%;
+              overflow: hidden;
+            }
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+              display: block;
+            }
+          </style>
+          </head>
+          <body>
+            namnsdag-2026_v${VERSION}.png
+          </body>
+          </html>
+          EOF
+
       - name: Commit and push
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add namnsdag-2026*.png
-          git commit -m "Daily auto-update ($RUN_DATE)" || echo "No changes"
+          git add namnsdag-2026_v*.png index2.html
+          git commit -m "Daily update ${RUN_DATE}" || echo "No changes"
           git push
