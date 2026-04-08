@@ -19,7 +19,6 @@ jobs:
       - name: Set Swedish date
         run: |
           echo "RUN_DATE=$(TZ=Europe/Stockholm date +%Y-%m-%d)" >> $GITHUB_ENV
-          echo "Using date: $(TZ=Europe/Stockholm date)"
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,15 +26,14 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install pillow
+        run: pip install pillow
 
       - name: Generate image
         run: python3 generate.py
         env:
           RUN_DATE: ${{ env.RUN_DATE }}
 
-      - name: Update index2.html to todays image
+      - name: Update index2.html
         run: |
           VERSION=${RUN_DATE//-/}
           cat <<EOF > index2.html
@@ -60,12 +58,12 @@ jobs:
           </style>
           </head>
           <body>
-            namnsdag-2026_v${VERSION}.png
+            <img src="namnsdag-2026_v${VERSION}.png">
           </body>
           </html>
           EOF
 
-      - name: Commit and push
+      - name: Commit & push
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
